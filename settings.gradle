@@ -1,2 +1,3 @@
-include ':app'
+include ':sdk', ':app'
+project(':sdk').projectDir = new File(rootDir, 'libs/cardboard/sdk/')
 rootProject.name = "PhyVR"
