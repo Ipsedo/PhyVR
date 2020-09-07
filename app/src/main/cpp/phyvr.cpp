@@ -7,99 +7,145 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <GLES3/gl3.h>
+#include <array>
 
-ndk_phyvr::HelloCardboardApp::HelloCardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr_obj)
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
-        : head_tracker_(nullptr),
-          lens_distortion_(nullptr),
-          distortion_renderer_(nullptr),
-          screen_params_changed_(false),
-          device_params_changed_(false),
-          screen_width_(0),
-          screen_height_(0){
+static constexpr uint64_t k_nanos_in_seconds = 1000000000;
+static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
 
-    JNIEnv* env;
-    vm->GetEnv((void**)&env, JNI_VERSION_1_6);
+/*
+ * App
+ */
+
+ndk_phyvr::App::App(JavaVM *vm, jobject obj, jobject asset_mgr_obj) {
+    JNIEnv *env;
+    vm->GetEnv((void **) &env, JNI_VERSION_1_6);
     java_asset_mgr_ = env->NewGlobalRef(asset_mgr_obj);
     asset_mgr_ = AAssetManager_fromJava(env, asset_mgr_obj);
+}
 
+ndk_phyvr::App::~App() {
+
+}
+
+void ndk_phyvr::App::on_surface_created(JNIEnv *env) {
+
+}
+
+void ndk_phyvr::App::set_screen_parameters(int width, int height) {
+
+}
+
+void ndk_phyvr::App::on_draw_frame() {
+
+}
+
+void ndk_phyvr::App::on_trigger_event() {
+
+}
+
+void ndk_phyvr::App::on_pause() {
+
+}
+
+void ndk_phyvr::App::on_resume() {
+
+}
+
+void ndk_phyvr::App::switch_viwer() {
+
+}
+
+/*
+ * NormalApp
+ */
+
+
+void ndk_phyvr::NormalApp::on_surface_created(JNIEnv *env) {
+
+}
+
+void ndk_phyvr::NormalApp::set_screen_parameters(int width, int height) {
+
+}
+
+void ndk_phyvr::NormalApp::on_draw_frame() {
+
+}
+
+void ndk_phyvr::NormalApp::on_trigger_event() {
+
+}
+
+void ndk_phyvr::NormalApp::on_pause() {
+
+}
+
+void ndk_phyvr::NormalApp::on_resume() {
+
+}
+
+void ndk_phyvr::NormalApp::switch_viwer() {
+
+}
+
+/*
+ * CardboardApp
+ */
+
+ndk_phyvr::CardboardApp::CardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr_obj)
+        : App(vm, obj,
+              asset_mgr_obj),
+          head_tracker_(nullptr),
+          lens_distortion_(nullptr),
+          distortion_renderer_(nullptr),
+          screen_width_(0),
+          screen_height_(0),
+          screen_params_changed_(false),
+          device_params_changed_(false){
     Cardboard_initializeAndroid(vm, obj);
     head_tracker_ = CardboardHeadTracker_create();
 }
 
-ndk_phyvr::HelloCardboardApp::~HelloCardboardApp() {
+ndk_phyvr::CardboardApp::~CardboardApp() {
     CardboardHeadTracker_destroy(head_tracker_);
     CardboardLensDistortion_destroy(lens_distortion_);
     CardboardDistortionRenderer_destroy(distortion_renderer_);
 }
 
-void ndk_phyvr::HelloCardboardApp::on_surface_created(JNIEnv *env) {
-    //TODO Load gl programs
+void ndk_phyvr::CardboardApp::on_surface_created(JNIEnv *env) {
+    //TODO init gl stuff
 }
 
-void ndk_phyvr::HelloCardboardApp::set_screen_parameters(int width, int height) {
+void ndk_phyvr::CardboardApp::set_screen_parameters(int width, int height) {
     screen_width_ = width;
     screen_height_ = height;
     screen_params_changed_ = true;
 }
 
-void ndk_phyvr::HelloCardboardApp::on_draw_frame() {
+void ndk_phyvr::CardboardApp::on_draw_frame() {
     if (!update_device_params()) {
         return;
     }
 
-    // Update Head Pose.
-    head_view_ = get_pose();
-
-    // Incorporate the floor height into the head_view
-    //head_view_ = head_view_ * GetTranslationMatrix({0.0f, kDefaultFloorHeight, 0.0f});
-
-    // Bind buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_SCISSOR_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Draw eyes views
-    for (int eye = 0; eye < 2; ++eye) {
-        glViewport(eye == kLeft ? 0 : screen_width_ / 2, 0, screen_width_ / 2,
-                   screen_height_);
-
-        /*Matrix4x4 eye_matrix = GetMatrixFromGlArray(eye_matrices_[eye]);
-        Matrix4x4 eye_view = eye_matrix * head_view_;
-
-        Matrix4x4 projection_matrix =
-                GetMatrixFromGlArray(projection_matrices_[eye]);
-        Matrix4x4 modelview_target = eye_view * model_target_;
-        modelview_projection_target_ = projection_matrix * modelview_target;
-        modelview_projection_room_ = projection_matrix * eye_view;*/
-
-        // Draw room and target
-        //DrawWorld();
-    }
-
-    // Render
+    //TODO graphic motor
     CardboardDistortionRenderer_renderEyeToDisplay(
-            distortion_renderer_, /* target_display = */ 0, /* x = */ 0, /* y = */ 0,
+            distortion_renderer_, 0, 0, 0,
             screen_width_, screen_height_, &left_eye_texture_description_,
             &right_eye_texture_description_);
-
-    //CHECKGLERROR("onDrawFrame");
 }
 
-void ndk_phyvr::HelloCardboardApp::on_trigger_event() {
-    //TODO get event
+void ndk_phyvr::CardboardApp::on_trigger_event() {
+
 }
 
-void ndk_phyvr::HelloCardboardApp::on_pause() {
+void ndk_phyvr::CardboardApp::on_pause() {
     CardboardHeadTracker_pause(head_tracker_);
 }
 
-void ndk_phyvr::HelloCardboardApp::on_resume() {
+void ndk_phyvr::CardboardApp::on_resume() {
     CardboardHeadTracker_resume(head_tracker_);
 
     // Parameters may have changed.
@@ -116,12 +162,11 @@ void ndk_phyvr::HelloCardboardApp::on_resume() {
     CardboardQrCode_destroy(buffer);
 }
 
-void ndk_phyvr::HelloCardboardApp::switch_viwer() {
+void ndk_phyvr::CardboardApp::switch_viwer() {
     CardboardQrCode_scanQrCodeAndSaveDeviceParams();
 }
 
-bool ndk_phyvr::HelloCardboardApp::update_device_params() {
-    //TODO Do gl_setup (for texture -> when params change)
+bool ndk_phyvr::CardboardApp::update_device_params() {
     if (!screen_params_changed_ && !device_params_changed_) {
         return true;
     }
@@ -142,7 +187,7 @@ bool ndk_phyvr::HelloCardboardApp::update_device_params() {
 
     CardboardQrCode_destroy(buffer);
 
-    gl_steup();
+    //TODO GLSetup()
 
     CardboardDistortionRenderer_destroy(distortion_renderer_);
     distortion_renderer_ = CardboardDistortionRenderer_create();
@@ -171,23 +216,25 @@ bool ndk_phyvr::HelloCardboardApp::update_device_params() {
     screen_params_changed_ = false;
     device_params_changed_ = false;
 
-    //CHECKGLERROR("UpdateDeviceParams");
-
     return true;
 }
 
-void ndk_phyvr::HelloCardboardApp::gl_steup() {
-    //TODO init buffer ect.
-}
+glm::mat4 ndk_phyvr::CardboardApp::get_cam_pos() {
+    std::array<float, 4> out_orientation{};
+    std::array<float, 3> out_position{};
 
-void ndk_phyvr::HelloCardboardApp::gl_teardown() {
-    //TODO delete buffer etc
-}
+    timespec res{};
+    clock_gettime(CLOCK_MONOTONIC, &res);
 
-glm::mat4 ndk_phyvr::HelloCardboardApp::get_pose() {
-    return glm::mat4();
-}
+    unsigned long monotonic_time_nano = (res.tv_sec * k_nanos_in_seconds) + res.tv_nsec;
+    monotonic_time_nano += k_prediction_time_without_vsync_nanos;
+    CardboardHeadTracker_getPose(head_tracker_, monotonic_time_nano,
+                                 &out_position[0], &out_orientation[0]);
 
-void ndk_phyvr::HelloCardboardApp::draw() {
+    glm::vec3 pos(out_position[0], out_position[1], out_position[2]);
+    glm::quat rot_quat(out_orientation[3], out_orientation[0], out_orientation[1], out_orientation[2]);
+
+    return glm::translate(glm::mat4(1.f), pos) * glm::mat4_cast(rot_quat);
+
 
 }

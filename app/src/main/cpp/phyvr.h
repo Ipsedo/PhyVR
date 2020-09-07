@@ -19,103 +19,78 @@ namespace ndk_phyvr {
  * This is a sample app for the Cardboard SDK. It loads a simple environment and
  * objects that you can click on.
  */
-    class HelloCardboardApp {
+
+    class App {
     public:
-        /**
-         * Creates a HelloCardboardApp.
-         *
-         * @param vm JavaVM pointer.
-         * @param obj Android activity object.
-         * @param asset_mgr_obj The asset manager object.
-         */
-        HelloCardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr_obj);
+        App(JavaVM *vm, jobject obj, jobject asset_mgr_obj);
 
-        ~HelloCardboardApp();
+        virtual ~App();
 
-        /**
-         * Initializes any GL-related objects. This should be called on the rendering
-         * thread with a valid GL context.
-         *
-         * @param env The JNI environment.
-         */
-        void on_surface_created(JNIEnv *env);
+        virtual void on_surface_created(JNIEnv *env) = 0;
 
-        /**
-         * Sets screen parameters.
-         *
-         * @param width Screen width
-         * @param height Screen height
-         */
-        void set_screen_parameters(int width, int height);
+        virtual void set_screen_parameters(int width, int height) = 0;
 
-        /**
-         * Draws the scene. This should be called on the rendering thread.
-         */
-        void on_draw_frame();
+        virtual void on_draw_frame() = 0;
 
-        /**
-         * Hides the target object if it's being targeted.
-         */
-        void on_trigger_event();
+        virtual void on_trigger_event() = 0;
 
-        /**
-         * Pauses head tracking.
-         */
-        void on_pause();
+        virtual void on_pause() = 0;
 
-        /**
-         * Resumes head tracking.
-         */
-        void on_resume();
+        virtual void on_resume() = 0;
 
-        /**
-         * Allows user to switch viewer.
-         */
-        void switch_viwer();
+        virtual void switch_viwer() = 0;
 
-    private:
-        /**
-         * Default near clip plane z-axis coordinate.
-         */
-        static constexpr float kZNear = 0.1f;
-
-        /**
-         * Default far clip plane z-axis coordinate.
-         */
-        static constexpr float kZFar = 100.f;
-
-        /**
-         * Updates device parameters, if necessary.
-         *
-         * @return true if device parameters were successfully updated.
-         */
-        bool update_device_params();
-
-        /**
-         * Initializes GL environment.
-         */
-        void gl_steup();
-
-        /**
-         * Deletes GL environment.
-         */
-        void gl_teardown();
-
-        /**
-         * Gets head's pose as a 4x4 matrix.
-         *
-         * @return matrix containing head's pose.
-         */
-        glm::mat4 get_pose();
-
-        /**
-         * Draw
-         */
-        void draw();
-
-
+    protected:
         jobject java_asset_mgr_;
         AAssetManager *asset_mgr_;
+    };
+
+    class NormalApp : public App {
+    public:
+        void on_surface_created(JNIEnv *env) override;
+
+        void set_screen_parameters(int width, int height) override;
+
+        void on_draw_frame() override;
+
+        void on_trigger_event() override;
+
+        void on_pause() override;
+
+        void on_resume() override;
+
+        void switch_viwer() override;
+    };
+
+    class CardboardApp : public App {
+    public:
+        CardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr_obj);
+
+        ~CardboardApp() override;
+
+        void on_surface_created(JNIEnv *env) override;
+
+        void set_screen_parameters(int width, int height) override;
+
+        void on_draw_frame() override;
+
+        void on_trigger_event() override;
+
+        void on_pause() override;
+
+        void on_resume() override;
+
+        void switch_viwer() override;
+
+    private:
+        static constexpr float kZNear = 0.1f;
+        static constexpr float kZFar = 100.f;
+
+        int screen_width_;
+        int screen_height_;
+
+        float projection_matrices_[2][16];
+        float eye_matrices_[2][16];
 
         CardboardHeadTracker *head_tracker_;
         CardboardLensDistortion *lens_distortion_;
@@ -124,16 +99,12 @@ namespace ndk_phyvr {
         CardboardEyeTextureDescription left_eye_texture_description_;
         CardboardEyeTextureDescription right_eye_texture_description_;
 
-        bool screen_params_changed_;
         bool device_params_changed_;
-        int screen_width_;
-        int screen_height_;
+        bool screen_params_changed_;
 
-        GLuint framebuffer_;
+        bool update_device_params();
 
-        glm::mat4 head_view_;
-        float projection_matrices_[2][16];
-        float eye_matrices_[2][16];
+        glm::mat4 get_cam_pos();
     };
 }
 
