@@ -1,0 +1,4 @@
+[submodule "bullet3"]
+	path = bullet3
+	url = https://github.com/bulletphysics/bullet3.git
+	branch = erwincoumans-patch-8
