@@ -10,3 +10,4 @@
 /sdk/build
 /captures
 .externalNativeBuild
+.cxx
