@@ -49,10 +49,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:2.0.1'
     // Android Mobile Vision
 
-    def tmp = project.rootDir
-
     implementation project(path: ':sdk')
-
 }
 
 task extractNdk(type: Copy)  {

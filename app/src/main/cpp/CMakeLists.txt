@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
-set(LIB_PATH ../../../../libs)
+set(LIB_PATH ../../../../)
 
 set(GLM_PATH ${LIB_PATH}/glm)
 set(BULLET_PATH ${LIB_PATH}/bullet3)
