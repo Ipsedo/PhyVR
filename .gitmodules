@@ -1,0 +1,14 @@
+[submodule "app/libs/bullet3"]
+	path = libs/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
+	branch = erwincoumans-patch-8
+[submodule "app/libs/SOIL2"]
+	path = libs/SOIL2
+	url = https://github.com/SpartanJ/SOIL2.git
+[submodule "app/libs/glm"]
+	path = libs/glm
+	url = https://github.com/g-truc/glm.git
+	branch = stable
+[submodule "app/libs/cardboard"]
+	path = libs/cardboard
+	url = https://github.com/googlevr/cardboard.git

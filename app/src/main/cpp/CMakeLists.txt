@@ -3,42 +3,72 @@
 
 # Sets the minimum version of CMake required to build the native library.
 
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.10.2)
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+set(LIB_PATH ../../../../libs)
 
-add_library( # Sets the name of the library.
-             native-lib
+set(GLM_PATH ${LIB_PATH}/glm)
+set(BULLET_PATH ${LIB_PATH}/bullet3)
+set(SOIL2_PATH ${LIB_PATH}/SOIL2)
 
-             # Sets the library as a shared library.
-             SHARED
+# Bullet 3
+set(CMAKE_C_FLAGS "-DUSE_PTHREADS -mfpu=neon -mfloat-abi=softfp -pthread -DSCE_PFX_USE_SIMD_VECTORMATH")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -O3")
 
-             # Provides a relative path to your source file(s).
-             native-lib.cpp )
+set(CMAKE_ANDROID_ARM_NEON "true")
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
+list(FILTER CMAKE_C_FLAGS EXCLUDE REGEX "-ffpu=vfp")
 
-find_library( # Sets the name of the path variable.
-              log-lib
+file(GLOB BULLET_SRC
+        ${BULLET_PATH}/src/LinearMath/*.cpp
+        ${BULLET_PATH}/src/Bullet3Common/*.cpp
+        ${BULLET_PATH}/src/BulletCollision/BroadphaseCollision/*.cpp
+        ${BULLET_PATH}/src/BulletCollision/CollisionDispatch/*.cpp
+        ${BULLET_PATH}/src/BulletCollision/CollisionShapes/*.cpp
+        ${BULLET_PATH}/src/BulletCollision/NarrowPhaseCollision/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/ConstraintSolver/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/Dynamics/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/Featherstone/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/MLCPSolvers/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/Vehicle/*.cpp
+        ${BULLET_PATH}/src/BulletDynamics/Character/*.cpp
+        ${BULLET_PATH}/src/BulletSoftBody/*.cpp
+        ${BULLET_PATH}/src/BulletInverseDynamics/*.cpp
+        ${BULLET_PATH}/src/BulletInverseDynamics/details/*.cpp
+        )
 
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
-              log )
+include_directories(${BULLET_PATH}/src)
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
+add_library(bullet3 STATIC ${BULLET_SRC})
 
-target_link_libraries( # Specifies the target library.
-                       native-lib
+# SOIL2
+file(GLOB SOIL2_SRC ${SOIL2_PATH}/src/SOIL2/*.c)
 
-                       # Links the target library to the log library
-                       # included in the NDK.
-                       ${log-lib} )
+include_directories(${SOIL2_PATH}/src)
+
+add_library(soil2 STATIC ${SOIL2_SRC})
+
+# PhyVR
+file(GLOB_RECURSE PHYVR_SRC ./*.cpp)
+
+add_library(phyvr SHARED ${PHYVR_SRC})
+
+find_library(
+        log-lib
+        log
+        GLESv3
+        soil2
+        bullet3
+)
+
+target_link_libraries(
+        phyvr
+        ${log-lib}
+        GLESv3
+        soil2
+        bullet3
+)
+
+# GLM
+include_directories(${GLM_PATH})
