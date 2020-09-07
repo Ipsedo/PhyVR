@@ -6,7 +6,7 @@
 
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
 #include <array>
 
 #include <glm/gtx/transform.hpp>

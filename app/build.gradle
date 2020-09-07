@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+def buildType
+
 android {
     compileSdkVersion 28
 
@@ -25,7 +27,14 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            buildType = "release"
         }
+
+        debug {
+            buildType = "debug"
+        }
+
     }
 
     externalNativeBuild {
@@ -39,8 +48,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     buildToolsVersion '29.0.0'
-}
 
+    applicationVariants.all { variant ->
+        buildType = variant.buildType.name // Sets the current build type
+    }
+}
 
 
 dependencies {
@@ -55,22 +67,21 @@ dependencies {
 
 }
 
-def buildDir="build/libraries/"
+def buildDir = "build/libraries/"
 
-task extractNdk(type: Copy)  {
-    if (file("${project.rootDir}/sdk/build/outputs/aar/sdk-release.aar").exists()) {
+task extractNdk(type: Copy) {
+
+    def willBuild = false
+
+    if (buildType == "debug" && file("${project.rootDir}/sdk/build/outputs/aar/sdk-debug.aar").exists()) {
+        willBuild = true
+    } else if (buildType == "release" && file("${project.rootDir}/sdk/build/outputs/aar/sdk-release.aar").exists()) {
+        willBuild = true
+    }
+
+    if (willBuild) {
         copy {
-            from zipTree("${project.rootDir}/sdk/build/outputs/aar/sdk-release.aar")
-            into buildDir
-            include "jni/**/libcardboard_api.so"
-        }
-        copy {
-            from "${project.rootDir}/sdk/include/cardboard.h"
-            into buildDir
-        }
-    } else if (file("${project.rootDir}/sdk/build/outputs/aar/sdk-debug.aar").exists()) {
-        copy {
-            from zipTree("${project.rootDir}/sdk/build/outputs/aar/sdk-debug.aar")
+            from zipTree("${project.rootDir}/sdk/build/outputs/aar/sdk-${buildType}.aar")
             into buildDir
             include "jni/**/libcardboard_api.so"
         }
@@ -82,8 +93,8 @@ task extractNdk(type: Copy)  {
 }
 
 task deleteNdk(type: Delete) {
-    delete "$buildDir/jni"
-    delete "$buildDir/cardboard.h"
+    delete "${buildDir}/jni"
+    delete "${buildDir}/cardboard.h"
 }
 
 build.dependsOn(extractNdk)

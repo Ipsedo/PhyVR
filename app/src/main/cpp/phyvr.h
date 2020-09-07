@@ -11,7 +11,7 @@
 #include <cardboard.h>
 
 #include <glm/glm.hpp>
-#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
 
 namespace ndk_phyvr {
 

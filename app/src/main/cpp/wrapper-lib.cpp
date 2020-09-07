@@ -1,10 +1,6 @@
 #include <jni.h>
 #include <string>
 
-#include <btBulletDynamicsCommon.h>
-#include <GLES3/gl3.h>
-#include <SOIL2/SOIL2.h>
-
 #include "phyvr.h"
 
 #define JNI_METHOD(return_type, method_name) \

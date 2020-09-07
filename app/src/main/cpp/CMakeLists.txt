@@ -58,7 +58,7 @@ add_library(phyvr SHARED ${PHYVR_SRC})
 find_library(
         log-lib
         log
-        GLESv3
+        GLESv2
         soil2
         bullet3
         android
@@ -68,7 +68,7 @@ target_link_libraries(
         phyvr
         android
         ${log-lib}
-        GLESv3
+        GLESv2
         soil2
         bullet3
         ${libs_dir}/jni/${ANDROID_ABI}/libcardboard_api.so
