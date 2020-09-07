@@ -8,9 +8,10 @@
 #include <android/asset_manager.h>
 #include <jni.h>
 
-#include <cardboard_v1.h>
+#include <cardboard.h>
 
 #include <glm/glm.hpp>
+#include <GLES3/gl3.h>
 
 namespace ndk_phyvr {
 
@@ -127,6 +128,12 @@ namespace ndk_phyvr {
         bool device_params_changed_;
         int screen_width_;
         int screen_height_;
+
+        GLuint framebuffer_;
+
+        glm::mat4 head_view_;
+        float projection_matrices_[2][16];
+        float eye_matrices_[2][16];
     };
 }
 

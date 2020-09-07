@@ -5,11 +5,12 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
-set(LIB_PATH ../../../../)
+set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
 
-set(GLM_PATH ${LIB_PATH}/glm)
-set(BULLET_PATH ${LIB_PATH}/bullet3)
-set(SOIL2_PATH ${LIB_PATH}/SOIL2)
+set(GLM_PATH ${ROOT_PATH}/glm)
+set(BULLET_PATH ${ROOT_PATH}/bullet3)
+set(SOIL2_PATH ${ROOT_PATH}/SOIL2)
+set(libs_dir ${ROOT_PATH}/app/build/libraries)
 
 # Bullet 3
 set(CMAKE_C_FLAGS "-DUSE_PTHREADS -mfpu=neon -mfloat-abi=softfp -pthread -DSCE_PFX_USE_SIMD_VECTORMATH")
@@ -60,16 +61,19 @@ find_library(
         GLESv3
         soil2
         bullet3
+        android
 )
 
 target_link_libraries(
         phyvr
+        android
         ${log-lib}
         GLESv3
         soil2
         bullet3
-        ${CMAKE_CURRENT_SOURCE_DIR}/libraries/jni/${ANDROID_ABI}/libcardboard_api.so
+        ${libs_dir}/jni/${ANDROID_ABI}/libcardboard_api.so
 )
 
 # GLM
-include_directories(${GLM_PATH})
+target_include_directories(phyvr PRIVATE ${libs_dir})
+target_include_directories(phyvr PRIVATE ${GLM_PATH})
