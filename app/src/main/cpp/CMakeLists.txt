@@ -68,6 +68,7 @@ target_link_libraries(
         GLESv3
         soil2
         bullet3
+        ${CMAKE_CURRENT_SOURCE_DIR}/libraries/jni/${ANDROID_ABI}/libcardboard_api.so
 )
 
 # GLM

@@ -8,6 +8,8 @@
 #include <android/asset_manager.h>
 #include <jni.h>
 
+#include <cardboard_v1.h>
+
 #include <glm/glm.hpp>
 
 namespace ndk_phyvr {
@@ -114,12 +116,12 @@ namespace ndk_phyvr {
         jobject java_asset_mgr_;
         AAssetManager *asset_mgr_;
 
-        /*CardboardHeadTracker *head_tracker_;
+        CardboardHeadTracker *head_tracker_;
         CardboardLensDistortion *lens_distortion_;
         CardboardDistortionRenderer *distortion_renderer_;
 
         CardboardEyeTextureDescription left_eye_texture_description_;
-        CardboardEyeTextureDescription right_eye_texture_description_;*/
+        CardboardEyeTextureDescription right_eye_texture_description_;
 
         bool screen_params_changed_;
         bool device_params_changed_;

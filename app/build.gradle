@@ -13,6 +13,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
+                arguments "-DANDROID_STL=c++_shared"
             }
         }
         ndk {
@@ -44,23 +45,24 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:2.0.1'
-    // Android Mobile Vision
 
-    implementation project(path: ':sdk')
+    implementation 'com.android.support:design:28.0.0'
+
+    implementation project(':sdk')
 }
 
 task extractNdk(type: Copy)  {
-    if (file("${project.rootDir}/libs/cardboard/sdk/build/outputs/aar/sdk-release.aar").exists()) {
+    if (file("${project.rootDir}/sdk/build/outputs/aar/sdk-release.aar").exists()) {
         copy {
-            from zipTree("${project.rootDir}/libs/cardboard/sdk/build/outputs/aar/sdk-release.aar")
+            from zipTree("${project.rootDir}/sdk/build/outputs/aar/sdk-release.aar")
             into "libraries/"
             include "jni/**/libcardboard_api.so"
         }
         copy {
-            from "${project.rootDir}/libs/cardboard/sdk/include/cardboard.h"
+            from "${project.rootDir}/sdk/include/cardboard.h"
             into "libraries/"
         }
     }
