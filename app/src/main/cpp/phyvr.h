@@ -13,6 +13,10 @@
 #include <glm/glm.hpp>
 #include <GLES2/gl2.h>
 
+#include "view/graphics.h"
+#include "model/physics.h"
+#include "controller/inputs.h"
+
 namespace ndk_phyvr {
 
 /**

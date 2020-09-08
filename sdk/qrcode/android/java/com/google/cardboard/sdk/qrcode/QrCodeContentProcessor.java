@@ -18,9 +18,11 @@ package com.google.cardboard.sdk.qrcode;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.cardboard.sdk.R;
 import java.io.IOException;
@@ -62,7 +64,8 @@ public class QrCodeContentProcessor {
 
     public final int statusCode;
     /** Only not null when statusCode is STATUS_OK. */
-    @Nullable public final byte[] params;
+    @Nullable
+    public final byte[] params;
 
     public static QrCodeToParamsStatus success(byte[] params) {
       return new QrCodeToParamsStatus(STATUS_OK, params);
