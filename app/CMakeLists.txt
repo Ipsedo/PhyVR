@@ -5,12 +5,20 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
-set(ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
+set(ROOT_PATH ${CMAKE_SOURCE_DIR}/..)
 
+set(PHYVR_PATH ${ROOT_PATH}/app/src/main/cpp)
 set(GLM_PATH ${ROOT_PATH}/glm)
 set(BULLET_PATH ${ROOT_PATH}/bullet3)
 set(SOIL2_PATH ${ROOT_PATH}/SOIL2)
-set(libs_dir ${ROOT_PATH}/app/build/libraries)
+set(LIBS_PATH ${ROOT_PATH}/app/build/libraries)
+
+find_library(
+        log-lib
+        log
+        GLESv2
+        android
+)
 
 # Bullet 3
 set(CMAKE_C_FLAGS "-DUSE_PTHREADS -mfpu=neon -mfloat-abi=softfp -pthread -DSCE_PFX_USE_SIMD_VECTORMATH")
@@ -43,37 +51,35 @@ include_directories(${BULLET_PATH}/src)
 
 add_library(bullet3 STATIC ${BULLET_SRC})
 
+unset(${CMAKE_C_FLAGS})
+unset(${CMAKE_CXX_FLAGS})
+unset(${CMAKE_ANDROID_ARM_NEON})
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
 # SOIL2
 file(GLOB SOIL2_SRC ${SOIL2_PATH}/src/SOIL2/*.c)
 
-include_directories(${SOIL2_PATH}/src)
-
 add_library(soil2 STATIC ${SOIL2_SRC})
 
+include_directories(${SOIL2_PATH}/src/SOIL2)
+
 # PhyVR
-file(GLOB_RECURSE PHYVR_SRC ./*.cpp)
+file(GLOB_RECURSE PHYVR_SRC ${PHYVR_PATH}/*.cpp)
 
 add_library(phyvr SHARED ${PHYVR_SRC})
-
-find_library(
-        log-lib
-        log
-        GLESv2
-        soil2
-        bullet3
-        android
-)
 
 target_link_libraries(
         phyvr
         android
-        ${log-lib}
+        log
+        EGL
         GLESv2
         soil2
         bullet3
-        ${libs_dir}/jni/${ANDROID_ABI}/libcardboard_api.so
+        ${LIBS_PATH}/jni/${ANDROID_ABI}/libcardboard_api.so
 )
 
-# GLM
-target_include_directories(phyvr PRIVATE ${libs_dir})
+target_include_directories(phyvr PRIVATE ${LIBS_PATH})
 target_include_directories(phyvr PRIVATE ${GLM_PATH})

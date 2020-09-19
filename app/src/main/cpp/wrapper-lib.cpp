@@ -9,12 +9,12 @@
 
 namespace {
 
-    inline jlong jptr(ndk_phyvr::CardboardApp* native_app) {
+    inline jlong jptr(phyvr_app::CardboardApp* native_app) {
         return reinterpret_cast<intptr_t>(native_app);
     }
 
-    inline ndk_phyvr::CardboardApp* native(jlong ptr) {
-        return reinterpret_cast<ndk_phyvr::CardboardApp*>(ptr);
+    inline phyvr_app::CardboardApp* native(jlong ptr) {
+        return reinterpret_cast<phyvr_app::CardboardApp*>(ptr);
     }
 
     JavaVM* javaVm;
@@ -30,7 +30,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 JNI_METHOD(jlong, nativeOnCreate)
 (JNIEnv* env, jobject obj, jobject asset_mgr) {
-    return jptr(new ndk_phyvr::CardboardApp(javaVm, obj, asset_mgr));
+    return jptr(new phyvr_app::CardboardApp(javaVm, obj, asset_mgr));
 }
 
 JNI_METHOD(void, nativeOnDestroy)

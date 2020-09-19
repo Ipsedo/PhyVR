@@ -11,24 +11,34 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  implements PopupMenu.OnMenuItemClickListener {
 
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("phyvr");
     }
+
+    private static int MY_PERMISSIONS_REQUEST_RECORD_AUDIO = 0;
+    private static int MY_PERMISSIONS_REQUEST_READ = 1;
+    private static int MY_PERMISSIONS_REQUEST_WRITE = 0;
+
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CODE = 2;
@@ -136,12 +146,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** Callback for when close button is pressed. */
+    /**
+     * Callback for when close button is pressed.
+     */
     public void closeSample(View view) {
         Log.d(TAG, "Leaving VR sample");
         finish();
     }
 
+    /** Callback for when settings_menu button is pressed. */
+    public void showSettings(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.settings_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        if (item.getItemId() == R.id.switch_viewer) {
+            nativeSwitchViewer(nativeApp);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Checks for activity permissions.
@@ -149,25 +178,38 @@ public class MainActivity extends AppCompatActivity {
      * @return whether the permissions are already granted.
      */
     private boolean arePermissionsEnabled() {
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED;
     }
 
-    /** Handles the requests for activity permissions. */
+    /**
+     * Handles the requests for activity permissions.
+     */
     private void requestPermissions() {
-        final String[] permissions = new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
+        final String[] permissions = new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
         ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST_CODE);
     }
 
-    /** Callback for the result from requesting permissions. */
+    /**
+     * Callback for the result from requesting permissions.
+     */
     @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (!arePermissionsEnabled()) {
-            Toast.makeText(this, R.string.no_permissions, Toast.LENGTH_LONG).show();
+            requestPermissions();
+
             if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    !ActivityCompat.shouldShowRequestPermissionRationale(
+                            this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 // Permission denied with checking "Do not ask again".
                 launchPermissionsSettings();
             }
@@ -211,6 +253,4 @@ public class MainActivity extends AppCompatActivity {
     private native void nativeSetScreenParams(long nativeApp, int width, int height);
 
     private native void nativeSwitchViewer(long nativeApp);
-
-
 }

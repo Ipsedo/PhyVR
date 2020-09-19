@@ -13,16 +13,16 @@
 #include <glm/glm.hpp>
 #include <GLES2/gl2.h>
 
-#include "view/graphics.h"
-#include "model/physics.h"
+#include "view/drawable.h"
+#include "core/entity.h"
 #include "controller/inputs.h"
 
-namespace ndk_phyvr {
+namespace phyvr_app {
 
-/**
- * This is a sample app for the Cardboard SDK. It loads a simple environment and
- * objects that you can click on.
- */
+
+    /*
+     * Basic App signature
+     */
 
     class App {
     public:
@@ -49,6 +49,10 @@ namespace ndk_phyvr {
         AAssetManager *asset_mgr_;
     };
 
+    /*
+     * Normal App - no VR
+     */
+
     class NormalApp : public App {
     public:
         void on_surface_created(JNIEnv *env) override;
@@ -65,6 +69,10 @@ namespace ndk_phyvr {
 
         void switch_viwer() override;
     };
+
+    /*
+     * Cardboard App - VR
+     */
 
     class CardboardApp : public App {
     public:
@@ -96,6 +104,10 @@ namespace ndk_phyvr {
         float projection_matrices_[2][16];
         float eye_matrices_[2][16];
 
+        GLuint depthRenderBuffer_;  // depth buffer
+        GLuint framebuffer_;        // framebuffer object
+        GLuint texture_;            // distortion texture
+
         CardboardHeadTracker *head_tracker_;
         CardboardLensDistortion *lens_distortion_;
         CardboardDistortionRenderer *distortion_renderer_;
@@ -109,6 +121,12 @@ namespace ndk_phyvr {
         bool update_device_params();
 
         glm::mat4 get_cam_pos();
+
+        float i;
+        std::shared_ptr<phyvr_view::ObjDrawable> cube;
+
+        void gl_setup();
+        void gl_teardown();
     };
 }
 
