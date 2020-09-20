@@ -20,16 +20,15 @@ static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
  * App
  */
 
-phyvr_app::App::App(JavaVM *vm, jobject obj, jobject asset_mgr_obj) {
+phyvr_app::App::App(JavaVM *vm, jobject obj, jobject asset_mgr_obj) :
+game_objects_(), game_engine_() {
     JNIEnv *env;
     vm->GetEnv((void **) &env, JNI_VERSION_1_6);
     java_asset_mgr_ = env->NewGlobalRef(asset_mgr_obj);
     asset_mgr_ = AAssetManager_fromJava(env, asset_mgr_obj);
 }
 
-phyvr_app::App::~App() {
-
-}
+phyvr_app::App::~App() = default;
 
 void phyvr_app::App::on_surface_created(JNIEnv *env) {
 
@@ -109,8 +108,6 @@ phyvr_app::CardboardApp::CardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr
           screen_height_(0),
           screen_params_changed_(false),
           device_params_changed_(false),
-          cube(nullptr),
-          i(0.f),
           projection_matrices_(),
           eye_matrices_(),
           left_eye_texture_description_(),
@@ -143,6 +140,9 @@ void phyvr_app::CardboardApp::on_draw_frame() {
 
     glm::mat4 head_view = get_cam_pos();
 
+    // Update model
+    game_engine_.update();
+
     // Bind buffer
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
@@ -164,23 +164,19 @@ void phyvr_app::CardboardApp::on_draw_frame() {
         glm::mat4 projection_matrix =
                 glm::make_mat4(projection_matrices_[eye]);
 
-        glm::mat4 model_matrix =
-                glm::rotate(glm::mat4(1.f), i, glm::vec3(0.f, 1.f, 0.f)) *
-                glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 10.f)) *
-                glm::rotate(glm::mat4(1.f), i, glm::vec3(sqrt(2.), sqrt(2), 0.f));
+        for (const auto &go: game_objects_) {
+            glm::mat4 model_matrix = go.entity->get_model_matrix();
 
-        phyvr_view::gl_infos infos{
-                projection_matrix,
-                eye_view,
-                model_matrix,
-                glm::vec3(1.f),
-                glm::vec3(0.f)
-        };
+            phyvr_view::gl_infos infos{
+                    projection_matrix,
+                    eye_view,
+                    model_matrix,
+                    glm::vec3(0.f)
+            };
 
-        cube->draw(infos);
+            go.drawable->draw(infos);
+        }
     }
-    i += 1e-2f;
-
 
     //TODO graphic motor
     CardboardDistortionRenderer_renderEyeToDisplay(
@@ -272,7 +268,39 @@ void phyvr_app::CardboardApp::gl_setup() {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                               GL_RENDERBUFFER, depthRenderBuffer_);
 
-    cube = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj", "158.png");
+    game_objects_.clear();
+    game_engine_.clear_entities();
+
+    // Cube
+    auto cube_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj", "158.png");
+    auto cube_entity = std::make_shared<phyvr_core::Cube>(
+            glm::vec3(0.f, 0.f, -10.f),
+            glm::vec3(1.f),
+            glm::rotate(glm::mat4(1.f), float(rand() % 360), glm::vec3(sqrt(2.), sqrt(2), 0.f)),
+            10.f, 1);
+
+    phyvr_app::game_object cube_object {
+        cube_drawable, cube_entity
+    };
+
+    game_objects_.push_back(cube_object);
+    game_engine_.add_entity(cube_entity);
+
+    // Floor
+
+    auto floor_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj", "canard.png");
+    auto floor_entity = std::make_shared<phyvr_core::Cube>(
+            glm::vec3(0.f, -5.f, -10.f),
+            glm::vec3(10.f, 1.f, 10.),
+            glm::mat4(1.f),
+            0.f, 1);
+
+    phyvr_app::game_object floor_object {
+            floor_drawable, floor_entity
+    };
+
+    game_objects_.push_back(floor_object);
+    game_engine_.add_entity(floor_entity);
 }
 
 bool phyvr_app::CardboardApp::update_device_params() {

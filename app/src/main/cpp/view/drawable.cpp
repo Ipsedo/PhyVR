@@ -67,7 +67,10 @@ phyvr_view::ObjDrawable::ObjDrawable(
             SOIL_LOAD_RGB
     );
 
+    glUseProgram(m_program);
+
     glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, texture_tex);
     glBindTexture(GL_TEXTURE_2D, texture_tex[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -172,6 +175,7 @@ phyvr_view::ObjDrawable::ObjDrawable(
     );
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
 }
 
 phyvr_view::ObjDrawable::~ObjDrawable() {

@@ -14,11 +14,15 @@
 #include <GLES2/gl2.h>
 
 #include "view/drawable.h"
-#include "core/entity.h"
+#include "core/physics.h"
 #include "controller/inputs.h"
 
 namespace phyvr_app {
 
+    struct game_object {
+        std::shared_ptr<phyvr_view::Drawable> drawable;
+        std::shared_ptr<phyvr_core::Entity> entity;
+    };
 
     /*
      * Basic App signature
@@ -47,6 +51,10 @@ namespace phyvr_app {
     protected:
         jobject java_asset_mgr_;
         AAssetManager *asset_mgr_;
+
+        std::vector<game_object> game_objects_;
+
+        phyvr_core::engine game_engine_;
     };
 
     /*
@@ -121,9 +129,6 @@ namespace phyvr_app {
         bool update_device_params();
 
         glm::mat4 get_cam_pos();
-
-        float i;
-        std::shared_ptr<phyvr_view::ObjDrawable> cube;
 
         void gl_setup();
         void gl_teardown();

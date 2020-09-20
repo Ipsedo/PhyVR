@@ -16,9 +16,6 @@ namespace phyvr_view {
         glm::mat4 projection_matrix;
         glm::mat4 view_matrix;
         glm::mat4 model_matrix;
-
-        glm::vec3 scale;
-
         glm::vec3 light_pos;
     };
 
