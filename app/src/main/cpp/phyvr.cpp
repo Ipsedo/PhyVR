@@ -12,6 +12,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <SOIL2.h>
 
 static constexpr uint64_t k_nanos_in_seconds = 1000000000;
 static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
@@ -21,7 +22,7 @@ static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
  */
 
 phyvr_app::App::App(JavaVM *vm, jobject obj, jobject asset_mgr_obj) :
-game_objects_(), game_engine_() {
+        game_objects_(), game_engine_() {
     JNIEnv *env;
     vm->GetEnv((void **) &env, JNI_VERSION_1_6);
     java_asset_mgr_ = env->NewGlobalRef(asset_mgr_obj);
@@ -142,6 +143,9 @@ void phyvr_app::CardboardApp::on_draw_frame() {
 
     // Update model
     game_engine_.update();
+    game_objects_.erase(std::remove_if(game_objects_.begin(), game_objects_.end(),
+                                       [](const game_object &go) { return go.entity->is_dead(); }),
+                        game_objects_.end());
 
     // Bind buffer
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
@@ -272,15 +276,16 @@ void phyvr_app::CardboardApp::gl_setup() {
     game_engine_.clear_entities();
 
     // Cube
-    auto cube_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj", "158.png");
+    auto cube_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj",
+                                                                   "158.png");
     auto cube_entity = std::make_shared<phyvr_core::Cube>(
             glm::vec3(0.f, 0.f, -10.f),
             glm::vec3(1.f),
             glm::rotate(glm::mat4(1.f), float(rand() % 360), glm::vec3(sqrt(2.), sqrt(2), 0.f)),
             10.f, 1);
 
-    phyvr_app::game_object cube_object {
-        cube_drawable, cube_entity
+    phyvr_app::game_object cube_object{
+            cube_drawable, cube_entity
     };
 
     game_objects_.push_back(cube_object);
@@ -288,19 +293,37 @@ void phyvr_app::CardboardApp::gl_setup() {
 
     // Floor
 
-    auto floor_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj", "canard.png");
-    auto floor_entity = std::make_shared<phyvr_core::Cube>(
-            glm::vec3(0.f, -5.f, -10.f),
-            glm::vec3(10.f, 1.f, 10.),
-            glm::mat4(1.f),
-            0.f, 1);
+    AAsset *file = AAssetManager_open(asset_mgr_, "heightmap.png", AASSET_MODE_BUFFER);
 
-    phyvr_app::game_object floor_object {
-            floor_drawable, floor_entity
+    auto length = AAsset_getLength(file);
+    auto img_buffer = AAsset_getBuffer(file);
+
+    int width = 0, height = 0, channels = 0;
+    auto texture_pixels = SOIL_load_image_from_memory(
+            (const unsigned char *) img_buffer, length,
+            &width, &height, &channels,
+            SOIL_LOAD_L
+    );
+
+    glm::vec3 terrain_scale(1.f, 1.f, 1.f);
+    auto terrain_field = phyvr_core::make_shape(texture_pixels, width, height, terrain_scale);
+
+    auto map_drawable = std::make_shared<phyvr_view::MapDrawable>(
+            terrain_field, 1.f);
+
+    auto map_entity = std::make_shared<phyvr_core::Map>(
+            terrain_field, glm::vec3(0.f, -3.f, 0.f), terrain_scale
+    );
+
+
+    game_object map_object{
+            map_drawable, map_entity
     };
 
-    game_objects_.push_back(floor_object);
-    game_engine_.add_entity(floor_entity);
+    SOIL_free_image_data(texture_pixels);
+
+    game_objects_.push_back(map_object);
+    game_engine_.add_entity(map_entity);
 }
 
 bool phyvr_app::CardboardApp::update_device_params() {

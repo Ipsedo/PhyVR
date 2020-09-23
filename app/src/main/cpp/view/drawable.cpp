@@ -9,6 +9,10 @@
 #include <SOIL2.h>
 #include <glm/gtc/type_ptr.hpp>
 
+/*
+ * Obj
+ */
+
 phyvr_view::ObjDrawable::ObjDrawable(
         AAssetManager *a_asset_manager,
         const std::string &obj_file_name,
@@ -175,7 +179,6 @@ phyvr_view::ObjDrawable::ObjDrawable(
     );
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glUseProgram(0);
 }
 
 phyvr_view::ObjDrawable::~ObjDrawable() {
@@ -195,7 +198,6 @@ void phyvr_view::ObjDrawable::draw(phyvr_view::gl_infos infos) {
     glm::mat4 mvp_matrix = infos.projection_matrix * mv_matrix;
 
     glUseProgram(m_program);
-    check_gl_error("create_prgm");
 
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glEnableVertexAttribArray(m_position_handle);
@@ -203,15 +205,11 @@ void phyvr_view::ObjDrawable::draw(phyvr_view::gl_infos infos) {
             m_position_handle, POSITION_SIZE, GL_FLOAT, GL_FALSE,
             STRIDE, (char *) nullptr);
 
-    check_gl_error("pos_buffer");
-
     glEnableVertexAttribArray(m_normal_handle);
     glVertexAttribPointer(
             m_normal_handle, NORMAL_SIZE, GL_FLOAT, GL_FALSE,
             STRIDE, (char *) nullptr + POSITION_SIZE * BYTES_PER_FLOAT
     );
-
-    check_gl_error("normal_buffer");
 
     glEnableVertexAttribArray(m_tex_coord_handle);
     glVertexAttribPointer(
@@ -219,35 +217,23 @@ void phyvr_view::ObjDrawable::draw(phyvr_view::gl_infos infos) {
             STRIDE, (char *) nullptr + (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT
     );
 
-    check_gl_error("tex_buffer");
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUniformMatrix4fv(m_mv_handle, 1, GL_FALSE, glm::value_ptr(mv_matrix));
 
-    check_gl_error("mv_handle");
-
     glUniformMatrix4fv(m_mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_matrix));
 
-    check_gl_error("mvp_handle");
-
     glUniform3fv(m_light_pos_handle, 1, glm::value_ptr(infos.light_pos));
-
-    check_gl_error("light_handle");
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_tex[0]);
     glUniform1i(m_tex_handle, 0);
 
-    check_gl_error("texture");
-
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-
-    check_gl_error("draw");
 
     glDisableVertexAttribArray(m_position_handle);
     glDisableVertexAttribArray(m_tex_coord_handle);
     glDisableVertexAttribArray(m_normal_handle);
 
-    check_gl_error("end_draw");
 }
+

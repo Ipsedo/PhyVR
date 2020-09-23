@@ -29,10 +29,9 @@ bool phyvr_core::Cube::explosion() {
 
 void phyvr_core::Cube::damage(int to_sub) {
     life -= to_sub;
-    life = life <= 0 ? life : 0;
 }
 
-void phyvr_core::Cube::on_contact_finish(std::shared_ptr<Entity> other) {
+void phyvr_core::Cube::on_contact_finish(Entity *other) {
 
 }
 
@@ -64,13 +63,12 @@ bool phyvr_core::Cone::explosion() {
     return life <= 0;
 }
 
-void phyvr_core::Cone::on_contact_finish(std::shared_ptr<Entity> other) {
+void phyvr_core::Cone::on_contact_finish(Entity *other) {
 
 }
 
 void phyvr_core::Cone::damage(int to_sub) {
     life -= to_sub;
-    life = life <= 0 ? life : 0;
 }
 
 void phyvr_core::Cone::update() {

@@ -10,7 +10,12 @@
 #include "entity.h"
 #include "simple.h"
 
+
 namespace phyvr_core {
+
+    bool callback_finish(void *user_persistent_data);
+
+    bool callback_processed(btManifoldPoint &cp, void *body0, void *body1);
 
     struct engine {
         btBroadphaseInterface *broad_phase__;

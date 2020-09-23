@@ -1,35 +1,30 @@
 //
-// Created by samuel on 08/09/20.
+// Created by samuel on 20/09/20.
 //
 
-#ifndef PHYVR_NDK_DRAWABLE_H
-#define PHYVR_NDK_DRAWABLE_H
+#ifndef PHYVR_NDK_HEIGHT_MAP_H
+#define PHYVR_NDK_HEIGHT_MAP_H
 
-#include <glm/glm.hpp>
-#include <android/asset_manager.h>
-#include <string>
-#include <vector>
-#include <tuple>
-#include <GLES2/gl2.h>
-
-#include "graphics.h"
+#include "drawable.h"
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 namespace phyvr_view {
 
-    class Drawable {
+    class TriangleCallback : public btTriangleCallback {
     public:
-        virtual void draw(gl_infos) = 0;
+        TriangleCallback();
+
+        int nb_vertex;
+        std::vector<float> packed_data;
+
+        void processTriangle(btVector3 *triangle, int partid, int triangleindex) override;
     };
 
-    class ObjDrawable : public Drawable {
+    class MapDrawable : public Drawable {
     public:
-        ObjDrawable(
-                AAssetManager *a_asset_manager,
-                const std::string &obj_file_name,
-                const std::string &texture_file
-        );
+        MapDrawable(btHeightfieldTerrainShape *terrain, float maxheight);
 
-        ~ObjDrawable();
+        ~MapDrawable();
 
         void draw(gl_infos infos) override;
 
@@ -39,17 +34,17 @@ namespace phyvr_view {
                 "\n"
                 "precision mediump float;\n"
                 "\n"
-                "uniform sampler2D u_tex;\n"
+                "uniform vec4 u_color;\n"
+                "\n"
                 "uniform vec3 u_light_pos;\n"
                 "\n"
                 "varying vec3 v_position;\n"
-                "varying vec2 v_tex_coord;\n"
                 "varying vec3 v_normal;\n"
                 "\n"
                 "void main() {\n"
                 "    vec3 lightVector = normalize(u_light_pos - v_position);\n"
                 "    float diffuse = max(dot(v_normal, lightVector), 0.1);\n"
-                "    gl_FragColor = texture2D(u_tex, v_tex_coord) * diffuse;\n"
+                "    gl_FragColor = u_color * diffuse;\n"
                 "}\n";
 
         const char *vertex_shader_prgm =
@@ -62,25 +57,20 @@ namespace phyvr_view {
                 "\n"
                 "attribute vec3 a_position;\n"
                 "attribute vec3 a_normal;\n"
-                "attribute vec2 a_tex_coord;\n"
                 "\n"
                 "varying vec3 v_position;\n"
-                "varying vec2 v_tex_coord;\n"
                 "varying vec3 v_normal;\n"
                 "\n"
                 "void main() {\n"
                 "  v_position = vec3(u_mv_matrix * vec4(a_position, 1.0));\n"
-                "  v_tex_coord = a_tex_coord;\n"
                 "  v_normal = normalize(vec3(u_mv_matrix * vec4(a_normal, 0.0)));\n"
                 "  gl_Position = u_mvp_matrix * vec4(a_position, 1.0);\n"
                 "}\n";
 
-
         const int POSITION_SIZE = 3;
         const int NORMAL_SIZE = 3;
-        const int TEX_COORD_SIZE = 2;
         const int BYTES_PER_FLOAT = 4;
-        const int STRIDE = (POSITION_SIZE + NORMAL_SIZE + TEX_COORD_SIZE) * BYTES_PER_FLOAT;
+        const int STRIDE = (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT;
 
         int nb_vertex;
 
@@ -90,20 +80,15 @@ namespace phyvr_view {
 
         GLuint m_position_handle;
         GLuint m_normal_handle;
-        GLuint m_tex_coord_handle;
         GLuint m_mvp_handle;
         GLuint m_light_pos_handle;
         GLuint m_mv_handle;
-        GLuint m_tex_handle;
-
-        unsigned char *texture_pixels;
-        GLuint *texture_tex;
+        GLuint m_color_handle;
 
         GLuint buffer;
 
+        float color[4];
     };
-
-
 }
 
-#endif //PHYVR_NDK_DRAWABLE_H
+#endif //PHYVR_NDK_HEIGHT_MAP_H

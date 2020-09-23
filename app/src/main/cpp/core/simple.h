@@ -20,7 +20,7 @@ namespace phyvr_core {
 
         void damage(int to_sub) override;
 
-        void on_contact_finish(std::shared_ptr<Entity> other) override;
+        void on_contact_finish(Entity *other) override;
 
         void update() override;
 
@@ -36,7 +36,7 @@ namespace phyvr_core {
 
         bool explosion() override;
 
-        void on_contact_finish(std::shared_ptr<Entity> other) override;
+        void on_contact_finish(Entity *other) override;
 
         void damage(int to_sub) override;
 

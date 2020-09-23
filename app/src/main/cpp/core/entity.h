@@ -31,7 +31,7 @@ namespace phyvr_core {
 
         virtual bool explosion();
 
-        virtual void on_contact_finish(std::shared_ptr<Entity> other) = 0;
+        virtual void on_contact_finish(Entity *other) = 0;
 
         virtual void damage(int to_sub) = 0;
 

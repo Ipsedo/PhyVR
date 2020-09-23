@@ -15,6 +15,8 @@
 
 #include "view/drawable.h"
 #include "core/physics.h"
+#include "core/map.h"
+#include "view/height_map.h"
 #include "controller/inputs.h"
 
 namespace phyvr_app {
