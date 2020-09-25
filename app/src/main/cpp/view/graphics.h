@@ -27,6 +27,15 @@ namespace phyvr_view {
 
     void check_gl_error(const char *tag);
 
+    class Camera {
+    public:
+        virtual glm::vec3 cam_pos();
+
+        virtual glm::vec3 cam_look_at();
+
+        virtual glm::vec3 cam_up();
+    };
+
 }
 
 #endif //PHYVR_NDK_GRAPHICS_H

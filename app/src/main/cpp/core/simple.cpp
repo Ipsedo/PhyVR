@@ -28,7 +28,7 @@ bool phyvr_core::Cube::explosion() {
 }
 
 void phyvr_core::Cube::damage(int to_sub) {
-    life -= to_sub;
+    //life -= to_sub;
 }
 
 void phyvr_core::Cube::on_contact_finish(Entity *other) {

@@ -35,8 +35,6 @@ namespace phyvr_view {
 
     private:
         const char *fragment_shader_prgm =
-                "#version 100\n"
-                "\n"
                 "precision mediump float;\n"
                 "\n"
                 "uniform sampler2D u_tex;\n"
@@ -53,10 +51,6 @@ namespace phyvr_view {
                 "}\n";
 
         const char *vertex_shader_prgm =
-                "#version 100\n"
-                "\n"
-                "precision mediump float;\n"
-                "\n"
                 "uniform mat4 u_mvp_matrix;\n"
                 "uniform mat4 u_mv_matrix;\n"
                 "\n"

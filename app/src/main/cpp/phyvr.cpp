@@ -13,6 +13,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <SOIL2.h>
+#include <android/log.h>
 
 static constexpr uint64_t k_nanos_in_seconds = 1000000000;
 static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
@@ -112,7 +113,9 @@ phyvr_app::CardboardApp::CardboardApp(JavaVM *vm, jobject obj, jobject asset_mgr
           projection_matrices_(),
           eye_matrices_(),
           left_eye_texture_description_(),
-          right_eye_texture_description_() {
+          right_eye_texture_description_(),
+          rand_gen(std::chrono::system_clock::now().time_since_epoch().count()),
+          real_dist(0.f, 1.f) {
     Cardboard_initializeAndroid(vm, obj);
     head_tracker_ = CardboardHeadTracker_create();
 }
@@ -175,7 +178,7 @@ void phyvr_app::CardboardApp::on_draw_frame() {
                     projection_matrix,
                     eye_view,
                     model_matrix,
-                    glm::vec3(0.f)
+                    glm::vec3(500, 400, 200)
             };
 
             go.drawable->draw(infos);
@@ -276,12 +279,14 @@ void phyvr_app::CardboardApp::gl_setup() {
     game_engine_.clear_entities();
 
     // Cube
-    auto cube_drawable = std::make_shared<phyvr_view::ObjDrawable>(asset_mgr_, "cube.obj",
-                                                                   "158.png");
+    auto cube_drawable = std::make_shared<phyvr_view::ObjDrawable>(
+            asset_mgr_, "obj/cube.obj", "158.png"
+    );
     auto cube_entity = std::make_shared<phyvr_core::Cube>(
             glm::vec3(0.f, 0.f, -10.f),
             glm::vec3(1.f),
-            glm::rotate(glm::mat4(1.f), float(rand() % 360), glm::vec3(sqrt(2.), sqrt(2), 0.f)),
+            glm::rotate(glm::mat4(1.f), real_dist(rand_gen) * 360.f,
+                        glm::vec3(sqrt(2.), sqrt(2), 0.f)),
             10.f, 1);
 
     phyvr_app::game_object cube_object{
@@ -305,22 +310,27 @@ void phyvr_app::CardboardApp::gl_setup() {
             SOIL_LOAD_L
     );
 
-    glm::vec3 terrain_scale(1.f, 1.f, 1.f);
-    auto terrain_field = phyvr_core::make_shape(texture_pixels, width, height, terrain_scale);
+    auto array_px = new float[width * height];
+    for (size_t i = 0; i < width * height; i++)
+        array_px[i] = float(texture_pixels[i]) / 255.f;
+
+    glm::vec3 terrain_scale(10.f, 200.f, 10.f);
+    auto terrain_field = phyvr_core::make_shape(array_px, width, height, terrain_scale);
 
     auto map_drawable = std::make_shared<phyvr_view::MapDrawable>(
-            terrain_field, 1.f);
-
-    auto map_entity = std::make_shared<phyvr_core::Map>(
-            terrain_field, glm::vec3(0.f, -3.f, 0.f), terrain_scale
+            terrain_field
     );
 
+    auto map_entity = std::make_shared<phyvr_core::Map>(
+            terrain_field, glm::vec3(0.f, 40.f, 0.f)
+    );
 
     game_object map_object{
             map_drawable, map_entity
     };
 
     SOIL_free_image_data(texture_pixels);
+    delete[] array_px;
 
     game_objects_.push_back(map_object);
     game_engine_.add_entity(map_entity);

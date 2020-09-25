@@ -13,12 +13,12 @@
 namespace phyvr_core {
 
     btHeightfieldTerrainShape *make_shape(
-            unsigned char *normalized_height_values, int width, int height, glm::vec3 scale
+            float *normalized_height_values, int width, int height, glm::vec3 scale
     );
 
     class Map : public Entity {
     public:
-        Map(btHeightfieldTerrainShape *shape, glm::vec3 pos, glm::vec3 scale);
+        Map(btHeightfieldTerrainShape *shape, glm::vec3 pos);
 
         void update() override;
 

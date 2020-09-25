@@ -16,6 +16,7 @@ namespace phyvr_core {
 
     btTransform get_start_transform(glm::vec3 pos, glm::mat4 rot_mat);
 
+    btConvexHullShape *parse_obj(const std::string &obj_file_content);
 
     class Entity : public btRigidBody {
     public:

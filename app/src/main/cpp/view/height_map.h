@@ -7,6 +7,7 @@
 
 #include "drawable.h"
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <random>
 
 namespace phyvr_view {
 
@@ -22,7 +23,7 @@ namespace phyvr_view {
 
     class MapDrawable : public Drawable {
     public:
-        MapDrawable(btHeightfieldTerrainShape *terrain, float maxheight);
+        MapDrawable(btHeightfieldTerrainShape *terrain);
 
         ~MapDrawable();
 
@@ -30,8 +31,6 @@ namespace phyvr_view {
 
     private:
         const char *fragment_shader_prgm =
-                "#version 100\n"
-                "\n"
                 "precision mediump float;\n"
                 "\n"
                 "uniform vec4 u_color;\n"
@@ -42,16 +41,12 @@ namespace phyvr_view {
                 "varying vec3 v_normal;\n"
                 "\n"
                 "void main() {\n"
-                "    vec3 lightVector = normalize(u_light_pos - v_position);\n"
-                "    float diffuse = max(dot(v_normal, lightVector), 0.1);\n"
+                "    vec3 light_vector = normalize(u_light_pos - v_position);\n"
+                "    float diffuse = max(dot(v_normal, light_vector), 0.1);\n"
                 "    gl_FragColor = u_color * diffuse;\n"
                 "}\n";
 
         const char *vertex_shader_prgm =
-                "#version 100\n"
-                "\n"
-                "precision mediump float;\n"
-                "\n"
                 "uniform mat4 u_mvp_matrix;\n"
                 "uniform mat4 u_mv_matrix;\n"
                 "\n"
@@ -71,6 +66,9 @@ namespace phyvr_view {
         const int NORMAL_SIZE = 3;
         const int BYTES_PER_FLOAT = 4;
         const int STRIDE = (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT;
+
+        std::mt19937 rand_gen;
+        std::uniform_real_distribution<float> uniform_dist;
 
         int nb_vertex;
 

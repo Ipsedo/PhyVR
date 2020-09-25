@@ -5,8 +5,9 @@
 #include "height_map.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <android/log.h>
 
-phyvr_view::TriangleCallback::TriangleCallback() : nb_vertex(0) {
+phyvr_view::TriangleCallback::TriangleCallback() : nb_vertex(0), packed_data() {
 
 }
 
@@ -46,7 +47,9 @@ phyvr_view::TriangleCallback::processTriangle(btVector3 *triangle, int partid, i
     nb_vertex += 3;
 }
 
-phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain, float maxheight) :
+phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain) :
+        rand_gen(std::chrono::system_clock::now().time_since_epoch().count()),
+        uniform_dist(0.f, 1.f),
         nb_vertex(0), color{1.f, 0.f, 0.f, 1.f} {
 
     std::vector<float> res;
@@ -104,7 +107,7 @@ phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain, float m
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     for (int i = 0; i < 3; i++)
-        color[i] = 0.3f + 0.7f * (float) rand() / RAND_MAX;
+        color[i] = 0.3f + 0.7f * uniform_dist(rand_gen);
     color[3] = 1.f;
 
 }
@@ -122,7 +125,6 @@ void phyvr_view::MapDrawable::draw(phyvr_view::gl_infos infos) {
     glm::mat4 mvp_matrix = infos.projection_matrix * mv_matrix;
 
     glUseProgram(m_program);
-    check_gl_error("create_prgm");
 
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glEnableVertexAttribArray(m_position_handle);
@@ -130,7 +132,6 @@ void phyvr_view::MapDrawable::draw(phyvr_view::gl_infos infos) {
             m_position_handle, POSITION_SIZE, GL_FLOAT, GL_FALSE,
             STRIDE, (char *) nullptr);
 
-    check_gl_error("pos_buffer");
 
     glEnableVertexAttribArray(m_normal_handle);
     glVertexAttribPointer(
@@ -138,29 +139,22 @@ void phyvr_view::MapDrawable::draw(phyvr_view::gl_infos infos) {
             STRIDE, (char *) nullptr + POSITION_SIZE * BYTES_PER_FLOAT
     );
 
-    check_gl_error("normal_buffer");
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUniformMatrix4fv(m_mv_handle, 1, GL_FALSE, glm::value_ptr(mv_matrix));
 
-    check_gl_error("mv_handle");
 
     glUniformMatrix4fv(m_mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_matrix));
 
-    check_gl_error("mvp_handle");
 
     glUniform3fv(m_light_pos_handle, 1, glm::value_ptr(infos.light_pos));
 
-    check_gl_error("light_handle");
     glUniform4fv(m_color_handle, 1, color);
 
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
 
-    check_gl_error("draw");
 
     glDisableVertexAttribArray(m_position_handle);
     glDisableVertexAttribArray(m_normal_handle);
-
-    check_gl_error("end_draw");
 }

@@ -4,6 +4,8 @@
 
 #include "entity.h"
 
+#include "../utils.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -11,9 +13,6 @@
 btRigidBody::btRigidBodyConstructionInfo
 phyvr_core::create_rigidbody_infos(btCollisionShape *shape, const btTransform &start_tr,
                                    btScalar mass) {
-
-    btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
-
     //rigidbody is dynamic if and only if mass is non zero, otherwise static
     bool isDynamic = (mass != 0.f);
 
@@ -35,6 +34,53 @@ btTransform phyvr_core::get_start_transform(glm::vec3 pos, glm::mat4 rot_mat) {
 
     return start_tr;
 }
+
+btConvexHullShape *phyvr_core::parse_obj(const std::string &obj_file_content) {
+    std::vector<std::string> lines = phyvr_utils::split(obj_file_content, '\n');
+    auto shape = new btConvexHullShape();
+    std::vector<float> vertex_list;
+    std::vector<int> vertex_draw_order;
+
+    for (auto &str : lines) {
+        std::vector<std::string> splitted_line = phyvr_utils::split(str, ' ');
+        if (!splitted_line.empty()) {
+            if (splitted_line[0] == "v") {
+                vertex_list.push_back(std::stof(splitted_line[1]));
+                vertex_list.push_back(std::stof(splitted_line[2]));
+                vertex_list.push_back(std::stof(splitted_line[3]));
+            } else if (splitted_line[0] == "f") {
+                std::vector<std::string> v1 = phyvr_utils::split(splitted_line[1], '/');
+                std::vector<std::string> v2 = phyvr_utils::split(splitted_line[2], '/');
+                std::vector<std::string> v3 = phyvr_utils::split(splitted_line[3], '/');
+
+                vertex_draw_order.push_back(std::stoi(v1[0]) - 1);
+                vertex_draw_order.push_back(std::stoi(v2[0]) - 1);
+                vertex_draw_order.push_back(std::stoi(v3[0]) - 1);
+
+                v1.clear();
+                v2.clear();
+                v3.clear();
+            }
+        }
+        splitted_line.clear();
+    }
+
+    unsigned long nbVertex = vertex_draw_order.size();
+    for (int i = 0; i < nbVertex; i++) {
+        btVector3 point(vertex_list[(vertex_draw_order[i] - 1) * 3],
+                        vertex_list[(vertex_draw_order[i] - 1) * 3 + 1],
+                        vertex_list[(vertex_draw_order[i] - 1) * 3 + 2]
+        );
+        shape->addPoint(point, true);
+    }
+
+    vertex_draw_order.clear();
+    vertex_list.clear();
+    lines.clear();
+
+    return shape;
+}
+
 
 /*
  * Entity

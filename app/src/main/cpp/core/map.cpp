@@ -6,22 +6,21 @@
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 btHeightfieldTerrainShape *
-phyvr_core::make_shape(unsigned char *normalized_height_values, int width, int length, glm::vec3 scale) {
+phyvr_core::make_shape(float *normalized_height_values, int width, int length, glm::vec3 scale) {
     auto map = new btHeightfieldTerrainShape(
-            width, length, normalized_height_values, 255, 0.f, 1.f,
-            1, PHY_UCHAR, false
+            width, length, normalized_height_values, 1.f, 0, 1.f,
+            1, PHY_FLOAT, false
     );
     map->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
     return map;
 }
 
-phyvr_core::Map::Map(btHeightfieldTerrainShape *shape, glm::vec3 pos,
-                     glm::vec3 scale)
+phyvr_core::Map::Map(btHeightfieldTerrainShape *shape, glm::vec3 pos)
         : Entity(
         [shape]() {
             return shape;
         },
-        pos, glm::mat4(1.f), scale, 0.f) {
+        pos, glm::mat4(1.f), glm::vec3(1.f), 0.f) {
 
 }
 

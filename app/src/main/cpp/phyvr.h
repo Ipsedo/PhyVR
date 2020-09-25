@@ -13,11 +13,14 @@
 #include <glm/glm.hpp>
 #include <GLES2/gl2.h>
 
+#include <random>
+
 #include "view/drawable.h"
 #include "core/physics.h"
 #include "core/map.h"
 #include "view/height_map.h"
 #include "controller/inputs.h"
+#include "core/tank.h"
 
 namespace phyvr_app {
 
@@ -106,7 +109,10 @@ namespace phyvr_app {
 
     private:
         static constexpr float kZNear = 0.1f;
-        static constexpr float kZFar = 100.f;
+        static constexpr float kZFar = 2000.f * 1.73205080757f;
+
+        std::mt19937 rand_gen;
+        std::uniform_real_distribution<float> real_dist;
 
         int screen_width_;
         int screen_height_;
