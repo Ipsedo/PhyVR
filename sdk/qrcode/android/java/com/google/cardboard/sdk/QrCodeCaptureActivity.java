@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,9 @@ public class QrCodeCaptureActivity extends AppCompatActivity
       if (hasLowStorage) {
         Toast.makeText(this, R.string.low_storage_error, Toast.LENGTH_LONG).show();
         Log.w(TAG, getString(R.string.low_storage_error));
+      } else {
+        Toast.makeText(this, R.string.missing_dependencies, Toast.LENGTH_LONG).show();
+        Log.w(TAG, getString(R.string.missing_dependencies));
       }
     }
 
@@ -215,9 +218,10 @@ public class QrCodeCaptureActivity extends AppCompatActivity
     Log.d(TAG, "QR code capture skipped");
 
     // Check if there are already saved parameters, if not save Cardboard V1 ones.
-    byte[] deviceParams = CardboardParamsUtils.readDeviceParamsFromExternalStorage();
+    final Context context = getApplicationContext();
+    byte[] deviceParams = CardboardParamsUtils.readDeviceParams(context);
     if (deviceParams == null) {
-      CardboardParamsUtils.saveCardboardV1DeviceParams();
+      CardboardParamsUtils.saveCardboardV1DeviceParams(context);
     }
     finish();
   }

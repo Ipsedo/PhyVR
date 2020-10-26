@@ -3,4 +3,16 @@
     <string name="switch_viewer" description="Switch the cardboard parameters">
             Switch Cardboard viewer
     </string>
+    <string name="vr_checkbox_text">
+        Use VR
+    </string>
+    <string name="gamepad_checkbox_text">
+        Use gamepad
+    </string>
+    <string name="play_button_text">
+        Play
+    </string>
+    <string name="control_mapping_button">
+        Map gamepad controls
+    </string>
 </resources>

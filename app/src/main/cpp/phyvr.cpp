@@ -24,10 +24,21 @@ static constexpr uint64_t k_prediction_time_without_vsync_nanos = 50000000;
 
 phyvr_app::App::App(JavaVM *vm, jobject obj, jobject asset_mgr_obj) :
         game_objects_(), game_engine_() {
+
     JNIEnv *env;
     vm->GetEnv((void **) &env, JNI_VERSION_1_6);
+
     java_asset_mgr_ = env->NewGlobalRef(asset_mgr_obj);
     asset_mgr_ = AAssetManager_fromJava(env, asset_mgr_obj);
+
+    sensor_manager__ = ASensorManager_getInstance();
+
+    sensor_looper__ = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
+
+    event_queue__ = ASensorManager_createEventQueue(
+            sensor_manager__,
+            sensor_looper__, LOOPER_ID_USER, nullptr, nullptr);
+
 }
 
 phyvr_app::App::~App() = default;
@@ -45,7 +56,13 @@ void phyvr_app::App::on_draw_frame() {
 }
 
 void phyvr_app::App::on_trigger_event() {
-
+    ASensorEvent event;
+    while (ASensorEventQueue_getEvents(event_queue__, &event, 1) > 0) {
+        if ((event.flags & AMOTION_EVENT_ACTION_BUTTON_PRESS) ==
+            AMOTION_EVENT_ACTION_BUTTON_PRESS) {
+            __android_log_print(ANDROID_LOG_DEBUG, "PhyVR", "button");
+        }
+    }
 }
 
 void phyvr_app::App::on_pause() {
@@ -74,10 +91,6 @@ void phyvr_app::NormalApp::set_screen_parameters(int width, int height) {
 }
 
 void phyvr_app::NormalApp::on_draw_frame() {
-
-}
-
-void phyvr_app::NormalApp::on_trigger_event() {
 
 }
 
@@ -190,10 +203,6 @@ void phyvr_app::CardboardApp::on_draw_frame() {
             distortion_renderer_, 0, 0, 0,
             screen_width_, screen_height_, &left_eye_texture_description_,
             &right_eye_texture_description_);
-}
-
-void phyvr_app::CardboardApp::on_trigger_event() {
-
 }
 
 void phyvr_app::CardboardApp::on_pause() {
@@ -360,7 +369,7 @@ bool phyvr_app::CardboardApp::update_device_params() {
     gl_setup();
 
     CardboardDistortionRenderer_destroy(distortion_renderer_);
-    distortion_renderer_ = CardboardDistortionRenderer_create();
+    distortion_renderer_ = CardboardOpenGlEs2DistortionRenderer_create();
 
     CardboardMesh left_mesh;
     CardboardMesh right_mesh;

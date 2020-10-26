@@ -5,7 +5,7 @@
 
 #define JNI_METHOD(return_type, method_name) \
   JNIEXPORT return_type JNICALL              \
-      Java_com_samuelberrien_phyvr_MainActivity_##method_name
+      Java_com_samuelberrien_phyvr_GameActivity_##method_name
 
 namespace {
 

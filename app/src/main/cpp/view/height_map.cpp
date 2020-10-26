@@ -132,28 +132,23 @@ void phyvr_view::MapDrawable::draw(phyvr_view::gl_infos infos) {
             m_position_handle, POSITION_SIZE, GL_FLOAT, GL_FALSE,
             STRIDE, (char *) nullptr);
 
-
     glEnableVertexAttribArray(m_normal_handle);
     glVertexAttribPointer(
             m_normal_handle, NORMAL_SIZE, GL_FLOAT, GL_FALSE,
             STRIDE, (char *) nullptr + POSITION_SIZE * BYTES_PER_FLOAT
     );
 
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUniformMatrix4fv(m_mv_handle, 1, GL_FALSE, glm::value_ptr(mv_matrix));
 
-
     glUniformMatrix4fv(m_mvp_handle, 1, GL_FALSE, glm::value_ptr(mvp_matrix));
-
 
     glUniform3fv(m_light_pos_handle, 1, glm::value_ptr(infos.light_pos));
 
     glUniform4fv(m_color_handle, 1, color);
 
     glDrawArrays(GL_TRIANGLES, 0, nb_vertex);
-
 
     glDisableVertexAttribArray(m_position_handle);
     glDisableVertexAttribArray(m_normal_handle);

@@ -7,6 +7,8 @@
 
 #include <android/asset_manager.h>
 #include <jni.h>
+#include <android/input.h>
+#include <android/sensor.h>
 
 #include <cardboard.h>
 
@@ -19,7 +21,7 @@
 #include "core/physics.h"
 #include "core/map.h"
 #include "view/height_map.h"
-#include "controller/inputs.h"
+#include "controller/controls.h"
 #include "core/tank.h"
 
 namespace phyvr_app {
@@ -45,7 +47,7 @@ namespace phyvr_app {
 
         virtual void on_draw_frame() = 0;
 
-        virtual void on_trigger_event() = 0;
+        void on_trigger_event();
 
         virtual void on_pause() = 0;
 
@@ -60,6 +62,15 @@ namespace phyvr_app {
         std::vector<game_object> game_objects_;
 
         phyvr_core::engine game_engine_;
+
+    private:
+
+        const int LOOPER_ID_USER = 3;
+
+        ASensorManager *sensor_manager__;
+        ALooper *sensor_looper__;
+        ASensorEventQueue *event_queue__;
+
     };
 
     /*
@@ -73,8 +84,6 @@ namespace phyvr_app {
         void set_screen_parameters(int width, int height) override;
 
         void on_draw_frame() override;
-
-        void on_trigger_event() override;
 
         void on_pause() override;
 
@@ -98,8 +107,6 @@ namespace phyvr_app {
         void set_screen_parameters(int width, int height) override;
 
         void on_draw_frame() override;
-
-        void on_trigger_event() override;
 
         void on_pause() override;
 
