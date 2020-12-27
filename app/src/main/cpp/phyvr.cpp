@@ -327,7 +327,7 @@ void phyvr_app::CardboardApp::gl_setup() {
     auto terrain_field = phyvr_core::make_shape(array_px, width, height, terrain_scale);
 
     auto map_drawable = std::make_shared<phyvr_view::MapDrawable>(
-            terrain_field
+            terrain_field, width, height
     );
 
     auto map_entity = std::make_shared<phyvr_core::Map>(

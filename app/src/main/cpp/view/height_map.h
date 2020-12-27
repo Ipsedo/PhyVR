@@ -23,7 +23,7 @@ namespace phyvr_view {
 
     class MapDrawable : public Drawable {
     public:
-        MapDrawable(btHeightfieldTerrainShape *terrain);
+        MapDrawable(btHeightfieldTerrainShape *terrain, int width, int height);
 
         ~MapDrawable();
 
@@ -86,6 +86,9 @@ namespace phyvr_view {
         GLuint buffer;
 
         float color[4];
+
+        std::vector<float> smooth_normal(
+                const std::vector<float> &packed_data, int width, int height);
     };
 }
 

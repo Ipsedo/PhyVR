@@ -47,7 +47,39 @@ phyvr_view::TriangleCallback::processTriangle(btVector3 *triangle, int partid, i
     nb_vertex += 3;
 }
 
-phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain) :
+std::vector<float> phyvr_view::MapDrawable::smooth_normal(
+        const std::vector<float> &packed_data, int width, int height) {
+    std::vector<float> res;
+
+    for (size_t i = 0, vertex_idx = 0; i < packed_data.size(); i += 6, vertex_idx++) {
+        glm::vec3 p1{packed_data[i], packed_data[i + 1], packed_data[i + 2]};
+        glm::vec3 n1{packed_data[i + 3], packed_data[i + 4], packed_data[i + 5]};
+
+        auto neighbors = {vertex_idx - 1, vertex_idx + 1, vertex_idx + width * 3 - 1,
+                          vertex_idx + width * 3, vertex_idx + width * 3 + 1};
+
+        glm::vec3 normal;
+        for (auto &n : neighbors) {
+            if (n < 0 || n > nb_vertex)
+                continue;
+            glm::vec3 curr_normal(packed_data[n * 6 + 3], packed_data[n * 6 + 4], packed_data[n * 6 + 5]);
+            normal.x += curr_normal.x;
+            normal.y += curr_normal.y;
+            normal.z += curr_normal.z;
+        }
+
+        res.push_back(p1.x);
+        res.push_back(p1.y);
+        res.push_back(p1.z);
+
+        res.push_back(normal.x);
+        res.push_back(normal.y);
+        res.push_back(normal.z);
+    }
+    return res;
+}
+
+phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain, int width, int height) :
         rand_gen(std::chrono::system_clock::now().time_since_epoch().count()),
         uniform_dist(0.f, 1.f),
         nb_vertex(0), color{1.f, 0.f, 0.f, 1.f} {
@@ -58,6 +90,8 @@ phyvr_view::MapDrawable::MapDrawable(btHeightfieldTerrainShape *terrain) :
     terrain->processAllTriangles(&callback, btVector3(-1000, -1000, -1000),
                                  btVector3(1000, 1000, 1000));
     nb_vertex = callback.nb_vertex;
+
+    //callback.packed_data = smooth_normal(callback.packed_data, width, height);
 
     /*
      * Init OpenGL program

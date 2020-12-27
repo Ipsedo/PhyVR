@@ -12,6 +12,7 @@ phyvr_core::make_shape(float *normalized_height_values, int width, int length, g
             1, PHY_FLOAT, false
     );
     map->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
+    //map->setUseZigzagSubdivision(true);
     return map;
 }
 
