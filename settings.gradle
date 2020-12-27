@@ -1,1 +1,1 @@
-include ':cardboard:sdk', ':app'
+include ':sdk', ':app'
