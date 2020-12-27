@@ -3,8 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PhyVR_ndk.iml" filepath="$PROJECT_DIR$/.idea/modules/PhyVR_ndk.iml" group="PhyVR_ndk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardboard/sdk/PhyVR_ndk.cardboard-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/cardboard/sdk/PhyVR_ndk.cardboard-sdk.iml" group="PhyVR_ndk/cardboard/sdk" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="PhyVR_ndk/app" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sdk/sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/sdk/sdk.iml" group="PhyVR_ndk/sdk" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardboard/cardboard.iml" filepath="$PROJECT_DIR$/.idea/modules/cardboard/cardboard.iml" group="PhyVR_ndk/cardboard" />
     </modules>
   </component>
 </project>

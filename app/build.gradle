@@ -58,7 +58,7 @@ dependencies {
     // Android Mobile Vision	    // Android Mobile Vision
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.google.android.material:material:1.2.1'
-    implementation project(path: ':sdk')
+    implementation project(path: ':cardboard:sdk')
 
 }
 
